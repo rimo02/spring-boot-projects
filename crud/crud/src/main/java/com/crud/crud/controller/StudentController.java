@@ -1,0 +1,82 @@
+package com.crud.crud.controller;
+
+import com.crud.crud.dto.StudentRequest;
+import com.crud.crud.dto.StudentResponse;
+import com.crud.crud.model.Student;
+import com.crud.crud.service.StudentService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/students")
+public class StudentController {
+    private final StudentService service;
+
+    @Autowired
+    public StudentController(StudentService service) {
+        this.service = service;
+    }
+
+    @PostMapping
+    public ResponseEntity<StudentResponse> create(@RequestBody StudentRequest request){
+        Student student = new Student();
+        student.setName(request.getName());
+        student.setAge(request.getAge());
+        student.setPassword(request.getPassword());
+
+        Student saved = service.create(student);
+        StudentResponse res = new StudentResponse();
+        res.setId(saved.getId());
+        res.setName(saved.getName());
+        res.setAge(saved.getAge());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(res);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<StudentResponse>> getAll(){
+        List<StudentResponse> students = service.getAll().stream().map(this::convertToResponse).toList();
+        return ResponseEntity.ok(students);
+    }
+
+    @GetMapping("/{id}")
+    public Student getStudentByid(Long id){
+        return service.getById(id);
+    }
+
+    @GetMapping("/search") // /students/search?name=Rimo&age=20
+    public List<Student> filter(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Integer age){
+        if (name != null && age != null) {
+            return service.getByNameAndAge(name, age);
+        } else if (name != null) {
+            return service.getByName(name);
+        } else if (age != null) {
+            return service.getByAge(age);
+        } else {
+            return service.getAll();
+        }
+    }
+
+    @PutMapping("/{id}")
+    public Student update(@PathVariable Long id, @RequestBody Student student){
+        return service.update(id,student);
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+        service.delete(id);
+    }
+    private StudentResponse convertToResponse(Student student) {
+        StudentResponse res = new StudentResponse();
+        res.setId(student.getId());
+        res.setName(student.getName());
+        res.setAge(student.getAge());
+        return res;
+    }
+
+}
