@@ -79,4 +79,23 @@ public class StudentController {
         return res;
     }
 
+    // JPQL
+    @GetMapping("/custom/jpql")
+    public List<StudentResponse> customJPQL(@RequestParam int age) {
+        return service.customJPQL(age).stream().map(this::convert).toList();
+    }
+
+    // Native SQL
+    @GetMapping("/custom/native")
+    public List<StudentResponse> customNative(@RequestParam String name) {
+        return service.customNative(name).stream().map(this::convert).toList();
+    }
+    private StudentResponse convert(Student student) {
+        StudentResponse res = new StudentResponse();
+        res.setId(student.getId());
+        res.setName(student.getName());
+        res.setAge(student.getAge());
+        return res;
+    }
+
 }

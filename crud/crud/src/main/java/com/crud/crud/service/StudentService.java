@@ -54,4 +54,12 @@ public class StudentService {
         studentRepository.deleteById(id);
     }
 
+    public List<Student> customJPQL(int age) {
+        return studentRepository.findStudentAboveAge(age);
+    }
+
+    public List<Student> customNative(String name) {
+        return studentRepository.searchByNameLike(name);
+    }
+
 }
