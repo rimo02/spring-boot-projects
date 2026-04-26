@@ -1,6 +1,8 @@
 package com.crud.crud.repository;
 
 import com.crud.crud.model.Student;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,6 +15,9 @@ public interface StudentRepository extends JpaRepository<Student,Long> {
     List<Student> findByName(String name); // automatically translates to select * from student where name = ?
     List<Student> findByAge(int age); // automatically translates to select * from student where age = ?
     List<Student> findByNameAndAge(String name, int age); // automatically translates to select * from student where name = ? and age = ?
+
+    Page<Student> findByNameContaining(String name, Pageable pageable);
+
 
     //JPQL
     @Query("Select s from Student s where s.age > :age")

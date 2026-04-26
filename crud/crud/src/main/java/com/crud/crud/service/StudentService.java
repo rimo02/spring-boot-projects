@@ -4,7 +4,9 @@ import com.crud.crud.exception.ResourceNotFoundException;
 import com.crud.crud.model.Student;
 import com.crud.crud.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.*;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +23,14 @@ public class StudentService {
     }
     public List<Student> getAll(){
         return studentRepository.findAll();
+
+    }
+    public Page<Student> getStudents(int page,int size, String sortBy, String keyword){
+        Pageable pageable = PageRequest.of(page,size,Sort.by(keyword));
+        if(keyword != null){
+            return studentRepository.findByNameContaining(keyword,pageable);
+        }
+        return studentRepository.findAll(pageable);
     }
 //    public Optional<Student> getById(Long id){
 //        return studentRepository.findById(id);
@@ -37,6 +47,9 @@ public class StudentService {
         }
         return studentRepository.findByAge(age);
     }
+
+
+
     public List<Student> getByNameAndAge(String name, int age) {
         return studentRepository.findByNameAndAge(name, age);
     }
