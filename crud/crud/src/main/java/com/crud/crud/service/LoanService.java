@@ -7,7 +7,7 @@ import com.crud.crud.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.*;
 
 @Service
 public class LoanService {
@@ -26,10 +26,21 @@ public class LoanService {
     }
 
     public List<Loan> getLoansByStudent(Long studentId) {
-        return loanRepository.findAll()
-                .stream()
-                .filter(l -> ( String.valueOf(l.getStudent().getId()).equals(studentId)))
-                .toList();
+        return loanRepository.findByStudentId(studentId);
     }
 
+    public List<String> getStudentLoanStats(double minAmount){
+        List<Object[]> rows = loanRepository.getStudentLoanStats(minAmount);
+        List<String> result = new ArrayList<>();
+        for (Object[] row : rows) {
+            String data = "Student ID: " + row[0] +
+                    ", Name: " + row[1] +
+                    ", Total Loans: " + row[2] +
+                    ", Total Amount: " + row[3] +
+                    ", Avg Loan: " + row[4];
+
+            result.add(data);
+        }
+        return result;
+    }
 }
