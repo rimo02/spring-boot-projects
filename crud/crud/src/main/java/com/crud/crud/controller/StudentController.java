@@ -4,6 +4,7 @@ import com.crud.crud.dto.StudentRequest;
 import com.crud.crud.dto.StudentResponse;
 import com.crud.crud.model.Student;
 import com.crud.crud.service.StudentService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -22,7 +23,7 @@ public class StudentController {
     }
 
     @PostMapping
-    public ResponseEntity<StudentResponse> create(@RequestBody StudentRequest request){
+    public ResponseEntity<StudentResponse> create(@Valid @RequestBody StudentRequest request){
         Student student = new Student();
         student.setName(request.getName());
         student.setAge(request.getAge());
@@ -74,7 +75,7 @@ public class StudentController {
     }
 
     @PutMapping("/{id}")
-    public Student update(@PathVariable Long id, @RequestBody Student student){
+    public Student update(@PathVariable Long id, @Valid @RequestBody Student student){
         return service.update(id,student);
     }
 
