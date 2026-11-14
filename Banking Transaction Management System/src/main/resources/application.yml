@@ -1,0 +1,60 @@
+spring:
+  config:
+    import: "optional:file:./.env[.properties]"
+  application:
+    name: banking
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/banking}
+    username: ${DB_USERNAME:banking}
+    password: ${DB_PASSWORD}
+    hikari:
+      connection-init-sql: SET lock_timeout = '10s'
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  data:
+    redis:
+      repositories:
+        enabled: false
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6380}
+      password: ${REDIS_PASSWORD:}
+      timeout: 500ms
+      connect-timeout: 500ms
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: never
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+server:
+  port: ${PORT:8084}
+  error:
+    include-message: never
+banking:
+  jwt:
+    secret: ${JWT_SECRET}
+    issuer: banking-api
+    ttl: PT15M
+  reports:
+    cron: ${REPORT_CRON:0 5 0 * * *}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+logging:
+  level:
+    # Driver constraint details can contain complete rows, including balances or password hashes.
+    org.hibernate.engine.jdbc.spi.SqlExceptionHelper: "OFF"

@@ -1,0 +1,71 @@
+@baseUrl = http://localhost:8084
+@customerToken = paste-alice-token
+@adminToken = paste-admin-token
+@source = 11111111-1111-1111-1111-111111111111
+@destination = 22222222-2222-2222-2222-222222222222
+
+### Register Alice (repeat with bob@example.test and admin@example.test before seeding)
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{"email":"alice@example.test","password":"local-demo-password-123"}
+
+### Login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{"email":"alice@example.test","password":"local-demo-password-123"}
+
+### Create an unfunded account
+POST {{baseUrl}}/api/accounts
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{"displayName":"Emergency savings"}
+
+### Balance is always read from PostgreSQL
+GET {{baseUrl}}/api/accounts/{{source}}
+Authorization: Bearer {{customerToken}}
+
+### Cached profile (no balance)
+GET {{baseUrl}}/api/accounts/{{source}}/profile
+Authorization: Bearer {{customerToken}}
+
+### Update profile; evict cache after commit
+PATCH {{baseUrl}}/api/accounts/{{source}}/profile
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{"displayName":"My savings"}
+
+### Retry unchanged with this same key to receive the original receipt
+POST {{baseUrl}}/api/transfers
+Authorization: Bearer {{customerToken}}
+Idempotency-Key: demo-transfer-001
+Content-Type: application/json
+
+{"sourceAccountId":"{{source}}","destinationAccountId":"{{destination}}","amount":125.50}
+
+### History: inclusive from, exclusive to; adapt dates to your test data
+GET {{baseUrl}}/api/accounts/{{source}}/transactions?page=0&size=20&sort=createdAt,desc&from=2026-11-01T00:00:00Z&to=2026-12-01T00:00:00Z
+Authorization: Bearer {{customerToken}}
+
+### Statement totals cover the entire range, entries are paginated
+GET {{baseUrl}}/api/accounts/{{source}}/statement?from=2026-11-01T00:00:00Z&to=2026-12-01T00:00:00Z&size=20
+Authorization: Bearer {{customerToken}}
+
+### Admin accounts
+GET {{baseUrl}}/api/admin/accounts?page=0&size=20
+Authorization: Bearer {{adminToken}}
+
+### Admin ledger
+GET {{baseUrl}}/api/admin/transactions?size=20&sort=amount,desc
+Authorization: Bearer {{adminToken}}
+
+### Run a completed UTC day's report
+POST {{baseUrl}}/api/admin/reports/daily/2026-11-13/run
+Authorization: Bearer {{adminToken}}
+
+### CSV export
+GET {{baseUrl}}/api/admin/reports/daily/2026-11-13/csv
+Authorization: Bearer {{adminToken}}
